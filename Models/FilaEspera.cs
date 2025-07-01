@@ -3,14 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("estoques")]
-    public class Estoque
+    [Table("FilasEspera")]
+    public class FilaEspera
     {
-        public int Id { get; set; }
-        public int Quantidade { get; set; }
+        
+        [JsonIgnore]
+        public int? ClienteId { get; set; }
 
-        public required string CodigoDeBarras { get; set; }
-
+        public virtual Cliente? Cliente { get; set; }
+        
         [JsonIgnore]
         public int? LivroId { get; set; }
 

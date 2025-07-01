@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ApiLocadora.Common.Validations;
 
 namespace ApiLocadora.Dtos
 {
@@ -6,11 +7,19 @@ namespace ApiLocadora.Dtos
     {
         
         [Required]
-        public required string Status { get; set; }
+        public required bool Status { get; set; }
 
         [Required]
-        public required DateTime DataInicio { get; set; }
+        public required DateOnly DataInicio { get; set; }
         [Required]
-        public required DateTime DataFim { get; set; }
+        public required DateOnly DataPrevista { get; set; }
+        
+        [Required]
+        [CheckExist]
+        public int ClienteId { get; set; }
+        
+        [Required]
+        [CheckExist]
+        public int FuncionarioId { get; set; }
     }
 }

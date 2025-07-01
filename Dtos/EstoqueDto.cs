@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ApiLocadora.Common.Validations;
 
 namespace ApiLocadora.Dtos
 {
@@ -6,6 +7,13 @@ namespace ApiLocadora.Dtos
     {
         [Required]
         public required int Quantidade { get; set; }
+        
+        [Required]
+        public required string CodigoDeBarras { get; set; }
+        
+        [Required]
+        [CheckExist]
+        public int LivroId { get; set; }
      
     }
 }

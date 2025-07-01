@@ -3,14 +3,14 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("generos")]
-    public class Genero
+    [Table("estudios")]
+    public class Estudio
     {
         public int Id { get; set; }
 
         public required string Nome { get; set; }
 
-        public required string Descricao { get; set; }
-        
+        [JsonIgnore]
+        public ICollection<Filme>? Filmes { get; set; }
     }
 }

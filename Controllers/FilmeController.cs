@@ -5,6 +5,8 @@ using ApiLocadora.Models;
 using ApiLocadora.DataContexts;
 using Microsoft.EntityFrameworkCore;
 using ApiLocadora.Services;
+using MySqlConnector;
+using ApiLocadora.Common.Exceptions;
 
 namespace ApiLocadora.Controllers
 {
@@ -14,15 +16,30 @@ namespace ApiLocadora.Controllers
     {
         private readonly FilmeService _service;
 
+        //private readonly AppDbContext _context;
+
         public FilmeController(FilmeService service)
         {
             _service = service;
+            //_context = context; 
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var listaFilmes = await _service.GetAll();
+
+            //var listaFilmes = await _context.Filmes
+            //    .Include(e => e.Estudio)
+            //    //.Select(e => new
+            //    //{
+            //    //    e.Id,
+            //    //    e.Nome,
+            //    //    e.AnoLancamento,
+            //    //    e.Genero,
+            //    //    Estudio = new { e.Estudio.Id, e.Estudio.Nome },
+            //    //})
+            //    .ToListAsync();
 
             return Ok(listaFilmes);
         }
@@ -61,11 +78,15 @@ namespace ApiLocadora.Controllers
 
                 return Created("", filme);
             }
-            catch (Exception ex)
+
+            catch (NotFoundException ex)
             {
-                return Problem(ex.Message);
+                return NotFound(ex.Message);
             }
-            
+            catch (Exception ex) 
+            { 
+                return Problem(ex.Message); 
+            }
         }
 
         [HttpPut("{id}")]

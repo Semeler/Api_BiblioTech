@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,14 +14,17 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public EstoqueService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public EstoqueService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Estoque>> GetAll()
         {
-            var list = await _context.Estoques.ToListAsync();
+            var list = await _context.Estoques.Include(e => e.Livro).ToListAsync();
 
             return list;
         }
@@ -25,7 +33,7 @@ namespace ApiLocadora.Services
         {
             try
             {
-                return await _context.Estoques
+                return await _context.Estoques 
                     .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)
@@ -38,25 +46,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                
-
-                var newEstoque = new Estoque
-                {
-                    Quantidade = estoque.Quantidade,
-                    
-                };
+                var newEstoque = _mapper.Map<Estoque>(estoque);
 
                 await _context.Estoques.AddAsync(newEstoque);
                 await _context.SaveChangesAsync();
 
                 return newEstoque;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Estoque?> Update(int id, EstoqueDto estoque)
         {
             try
@@ -69,7 +71,8 @@ namespace ApiLocadora.Services
                 }
 
                 _estoque.Quantidade = estoque.Quantidade;
-
+                _estoque.CodigoDeBarras = estoque.CodigoDeBarras;
+                
                 _context.Estoques.Update(_estoque);
                 await _context.SaveChangesAsync();
 
@@ -77,9 +80,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Estoque?> Delete(int id)

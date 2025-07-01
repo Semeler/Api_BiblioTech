@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,9 +14,12 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public ClienteService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public ClienteService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Cliente>> GetAll()
@@ -38,29 +46,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                var data = cliente.DataNascimento;
-
-                var newCliente = new Cliente
-                {
-                    Nome = cliente.Nome,
-                    CPF = cliente.CPF,
-                    Endereco = cliente.Endereco,
-                    Telefone = cliente.Telefone,
-                    Email = cliente.Email,
-                    DataNascimento = new DateOnly(data.Year, data.Month, data.Day)
-                };
+                var newCliente = _mapper.Map<Cliente>(cliente);
 
                 await _context.Clientes.AddAsync(newCliente);
                 await _context.SaveChangesAsync();
 
                 return newCliente;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Cliente?> Update(int id, ClienteDto cliente)
         {
             try
@@ -73,10 +71,16 @@ namespace ApiLocadora.Services
                 }
 
                 _cliente.Nome = cliente.Nome;
-                _cliente.CPF = cliente.CPF;
-                _cliente.Endereco = cliente.Endereco;
+                _cliente.Cpf = cliente.Cpf;
                 _cliente.Telefone = cliente.Telefone;
-                _cliente.Email = cliente.Endereco;
+                _cliente.Email = cliente.Email;
+                _cliente.DataNascimento = cliente.DataNascimento;
+                _cliente.Cep = cliente.Cep;
+                _cliente.Rua = cliente.Rua;
+                _cliente.Bairro = cliente.Bairro;
+                _cliente.Numero = cliente.Numero;
+                _cliente.Estado = cliente.Estado;
+                _cliente.Cidade = cliente.Cidade;
 
                 _context.Clientes.Update(_cliente);
                 await _context.SaveChangesAsync();
@@ -85,9 +89,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Cliente?> Delete(int id)
@@ -95,7 +99,7 @@ namespace ApiLocadora.Services
             return null;
         }
 
-        private async Task<bool> Exist(int id)
+        public async Task<bool> Exist(int id)
         {
             return await _context.Clientes.AnyAsync(c => c.Id == id);
         }

@@ -8,7 +8,7 @@ namespace ApiLocadora.Dtos
         [MinLength(5)]
         public required string Nome { get; set; }
         [Required]
-        public required string CPF { get; set; }
+        public required string Cpf { get; set; }
         [Required]
         public required string Cargo { get; set; }
         [Required]
@@ -16,6 +16,18 @@ namespace ApiLocadora.Dtos
         [Required]
         public required string Email { get; set; }
         [Required]
-        public required DateTime DataAdmissao { get; set; }
+        public required DateOnly DataAdmissao { get; set; }
+        [Required]
+        public required string Cep { get; set; }
+        [Required]
+        public required string Rua { get; set; }
+        [Required]
+        public required string Bairro { get; set; }
+        [Required]
+        public required string Numero { get; set; }
+        [Required]
+        public required string Estado { get; set; }
+        [Required]
+        public required string Cidade { get; set; }
     }
 }

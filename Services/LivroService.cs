@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,14 +14,18 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public LivroService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public LivroService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Livro>> GetAll()
         {
-            var list = await _context.Livros.ToListAsync();
+            var list = await _context.Livros.Include(e => e.Genero)
+                .ToListAsync();
 
             return list;
         }
@@ -38,29 +47,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                var data = livro.AnoPublicacao;
-
-                var newLivro = new Livro
-                {
-                    Titulo = livro.Titulo,
-                    Autor = livro.Autor,
-                    ISBN = livro.ISBN,
-                    Sinopse = livro.Sinopse,
-                    Editora = livro.Editora,
-                    AnoPublicacao = new DateOnly(data.Year, data.Month, data.Day)
-                };
+                var newLivro = _mapper.Map<Livro>(livro);
 
                 await _context.Livros.AddAsync(newLivro);
                 await _context.SaveChangesAsync();
 
                 return newLivro;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Livro?> Update(int id, LivroDto livro)
         {
             try
@@ -74,10 +73,11 @@ namespace ApiLocadora.Services
 
                 _livro.Titulo = livro.Titulo;
                 _livro.Autor = livro.Autor;
-                _livro.ISBN = livro.ISBN;
+                _livro.Isbn = livro.Isbn;
+                _livro.Isbn = livro.Isbn;
                 _livro.Editora = livro.Editora;
-                _livro.Sinopse = livro.Editora;
-
+                _livro.Sinopse = livro.Sinopse;
+                
                 _context.Livros.Update(_livro);
                 await _context.SaveChangesAsync();
 
@@ -85,9 +85,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Livro?> Delete(int id)

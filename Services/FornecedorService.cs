@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,9 +14,12 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public FornecedorService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public FornecedorService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Fornecedor>> GetAll()
@@ -38,28 +46,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                
-                var newFornecedor = new Fornecedor
-                {
-                    Nome = fornecedor.Nome,
-                    CNPJ = fornecedor.CNPJ,
-                    Endereco = fornecedor.Endereco,
-                    Telefone = fornecedor.Telefone,
-                    Email = fornecedor.Email,
-                    
-                };
+                var newFornecedor = _mapper.Map<Fornecedor>(fornecedor);
 
                 await _context.Fornecedores.AddAsync(newFornecedor);
                 await _context.SaveChangesAsync();
 
                 return newFornecedor;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Fornecedor?> Update(int id, FornecedorDto fornecedor)
         {
             try
@@ -72,11 +71,16 @@ namespace ApiLocadora.Services
                 }
 
                 _fornecedor.Nome = fornecedor.Nome;
-                _fornecedor.CNPJ = fornecedor.CNPJ;
-                _fornecedor.Endereco = fornecedor.Endereco;
+                _fornecedor.Cnpj = fornecedor.Cnpj;
                 _fornecedor.Telefone = fornecedor.Telefone;
-                _fornecedor.Email = fornecedor.Endereco;
-
+                _fornecedor.Email = fornecedor.Email;
+                _fornecedor.Cep = fornecedor.Cep;
+                _fornecedor.Rua = fornecedor.Rua;
+                _fornecedor.Bairro = fornecedor.Bairro;
+                _fornecedor.Numero = fornecedor.Numero;
+                _fornecedor.Estado = fornecedor.Estado;
+                _fornecedor.Cidade = fornecedor.Cidade;
+                
                 _context.Fornecedores.Update(_fornecedor);
                 await _context.SaveChangesAsync();
 
@@ -84,9 +88,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Fornecedor?> Delete(int id)

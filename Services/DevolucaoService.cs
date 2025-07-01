@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,14 +14,18 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public DevolucaoService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public DevolucaoService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Devolucao>> GetAll()
         {
-            var list = await _context.Devolucaos.ToListAsync();
+            var list = await _context.Devolucaos.Include(e => e.Cliente)
+                .Include(e => e.Funcionario).ToListAsync();
 
             return list;
         }
@@ -38,25 +47,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                var data = devolucao.DataDevolucao;
-
-                var newDevolucao = new Devolucao
-                {
-                    Multa = devolucao.Multa,
-                    DataDevolucao = new DateOnly(data.Year, data.Month, data.Day)
-                };
+                var newDevolucao = _mapper.Map<Devolucao>(devolucao);
 
                 await _context.Devolucaos.AddAsync(newDevolucao);
                 await _context.SaveChangesAsync();
 
                 return newDevolucao;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Devolucao?> Update(int id, DevolucaoDto devolucao)
         {
             try
@@ -69,7 +72,7 @@ namespace ApiLocadora.Services
                 }
 
                 _devolucao.Multa = devolucao.Multa;
-
+                
                 _context.Devolucaos.Update(_devolucao);
                 await _context.SaveChangesAsync();
 
@@ -77,9 +80,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Devolucao?> Delete(int id)

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
@@ -12,5 +13,10 @@ namespace ApiLocadora.Models
         public required string Genero { get; set; }
 
         public DateOnly? AnoLancamento { get; set; }
+
+        [JsonIgnore]
+        public int? EstudioId { get; set; }
+
+        public virtual Estudio? Estudio { get; set; }
     }
 }

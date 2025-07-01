@@ -10,31 +10,30 @@ using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
-    public class EmprestimoService
+    public class GeneroService
     {
         private readonly AppDbContext _context;
 
         private readonly IMapper _mapper;
 
-        public EmprestimoService(AppDbContext context, IMapper mapper)
+        public GeneroService(AppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Emprestimo>> GetAll()
+        public async Task<ICollection<Genero>> GetAll()
         {
-            var list = await _context.Emprestimos.Include(e => e.Cliente)
-                .Include(e => e.Funcionario).ToListAsync();
+            var list = await _context.Generos.ToListAsync();
 
             return list;
         }
 
-        public async Task<Emprestimo?> GetOneById(int id)
+        public async Task<Genero?> GetOneById(int id)
         {
             try
             {
-                return await _context.Emprestimos
+                return await _context.Generos
                     .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)
@@ -43,16 +42,16 @@ namespace ApiLocadora.Services
             }
         }
 
-        public async Task<Emprestimo?> Create(EmprestimoDto emprestimo)
+        public async Task<Genero?> Create(GeneroDto genero)
         {
             try
             {
-                var newEmprestimo = _mapper.Map<Emprestimo>(emprestimo);
+                var newGenero = _mapper.Map<Genero>(genero);
 
-                await _context.Emprestimos.AddAsync(newEmprestimo);
+                await _context.Generos.AddAsync(newGenero);
                 await _context.SaveChangesAsync();
 
-                return newEmprestimo;
+                return newGenero;
             }   
             catch (Exception ex)
             { 
@@ -60,23 +59,24 @@ namespace ApiLocadora.Services
             }
         }
         
-        public async Task<Emprestimo?> Update(int id, EmprestimoDto emprestimo)
+        public async Task<Genero?> Update(int id, GeneroDto genero)
         {
             try
             {
-                var _emprestimo = await GetOneById(id);
+                var _genero = await GetOneById(id);
 
-                if (_emprestimo is null)
+                if (_genero is null)
                 {
-                    return _emprestimo;
+                    return _genero;
                 }
 
-                _emprestimo.Status = emprestimo.Status;
+                _genero.Nome = genero.Nome;
+                _genero.Descricao = genero.Descricao;;
                 
-                _context.Emprestimos.Update(_emprestimo);
+                _context.Generos.Update(_genero);
                 await _context.SaveChangesAsync();
 
-                return _emprestimo;
+                return _genero;
             }
             catch (Exception ex)
             {
@@ -85,14 +85,14 @@ namespace ApiLocadora.Services
             
         }
 
-        public async Task<Emprestimo?> Delete(int id)
+        public async Task<Genero?> Delete(int id)
         {
             return null;
         }
 
         private async Task<bool> Exist(int id)
         {
-            return await _context.Emprestimos.AnyAsync(c => c.Id == id);
+            return await _context.Generos.AnyAsync(c => c.Id == id);
         }
     }
 }

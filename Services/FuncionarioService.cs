@@ -1,7 +1,12 @@
+using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
+using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
@@ -9,9 +14,12 @@ namespace ApiLocadora.Services
     {
         private readonly AppDbContext _context;
 
-        public FuncionarioService(AppDbContext context)
+        private readonly IMapper _mapper;
+
+        public FuncionarioService(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<ICollection<Funcionario>> GetAll()
@@ -38,29 +46,19 @@ namespace ApiLocadora.Services
         {
             try
             {
-                var data = funcionario.DataAdmissao;
-
-                var newFuncionario = new Funcionario
-                {
-                    Nome = funcionario.Nome,
-                    CPF = funcionario.CPF,
-                    Cargo = funcionario.Cargo,
-                    Telefone = funcionario.Telefone,
-                    Email = funcionario.Email,
-                    DataAdmissao = new DateOnly(data.Year, data.Month, data.Day)
-                };
+                var newFuncionario = _mapper.Map<Funcionario>(funcionario);
 
                 await _context.Funcionarios.AddAsync(newFuncionario);
                 await _context.SaveChangesAsync();
 
                 return newFuncionario;
-            }
-            catch (Exception)
-            {
-                throw;
+            }   
+            catch (Exception ex)
+            { 
+                throw ex;
             }
         }
-
+        
         public async Task<Funcionario?> Update(int id, FuncionarioDto funcionario)
         {
             try
@@ -73,11 +71,17 @@ namespace ApiLocadora.Services
                 }
 
                 _funcionario.Nome = funcionario.Nome;
-                _funcionario.CPF = funcionario.CPF;
+                _funcionario.Cpf = funcionario.Cpf;
                 _funcionario.Cargo = funcionario.Cargo;
                 _funcionario.Telefone = funcionario.Telefone;
                 _funcionario.Email = funcionario.Email;
-
+                _funcionario.Cep = funcionario.Cep;
+                _funcionario.Rua = funcionario.Rua;
+                _funcionario.Bairro = funcionario.Bairro;
+                _funcionario.Numero = funcionario.Numero;
+                _funcionario.Estado = funcionario.Estado;
+                _funcionario.Cidade = funcionario.Cidade;
+                
                 _context.Funcionarios.Update(_funcionario);
                 await _context.SaveChangesAsync();
 
@@ -85,9 +89,9 @@ namespace ApiLocadora.Services
             }
             catch (Exception ex)
             {
-                throw ex;
+                    throw ex;
             }
-
+            
         }
 
         public async Task<Funcionario?> Delete(int id)
