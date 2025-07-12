@@ -10,9 +10,9 @@ namespace ApiLocadora.Dtos
         public required bool Status { get; set; }
 
         [Required]
-        public required DateOnly DataInicio { get; set; }
+        public required DateTime DataInicio { get; set; }
         [Required]
-        public required DateOnly DataPrevista { get; set; }
+        public required DateTime DataPrevista { get; set; }
         
         [Required]
         [CheckExist]

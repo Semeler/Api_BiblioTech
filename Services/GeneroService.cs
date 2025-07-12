@@ -87,7 +87,27 @@ namespace ApiLocadora.Services
 
         public async Task<Genero?> Delete(int id)
         {
-            return null;
+            try
+            {
+                var genero = await _context.Generos
+                    .SingleOrDefaultAsync(x => x.Id == id);
+
+                if (genero is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Generos.Remove(genero);
+                await _context.SaveChangesAsync();
+
+                return genero;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         private async Task<bool> Exist(int id)

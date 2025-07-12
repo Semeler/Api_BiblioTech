@@ -8,13 +8,13 @@ using ApiLocadora.Services;
 
 namespace ApiLocadora.Controllers
 {
-    [Route("funcionarios")]
+    [Route("generos")]
     [ApiController]
-    public class FuncionarioController : ControllerBase
+    public class GeneroController : ControllerBase
     {
-        private readonly FuncionarioService _service;
+        private readonly GeneroService _service;
 
-        public FuncionarioController(FuncionarioService service)
+        public GeneroController(GeneroService service)
         {
             _service = service;
         }
@@ -22,9 +22,9 @@ namespace ApiLocadora.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var listaFuncionarios = await _service.GetAll();
+            var listaGeneros = await _service.GetAll();
 
-            return Ok(listaFuncionarios);
+            return Ok(listaGeneros);
         }
 
         [HttpGet("{id}")]
@@ -32,14 +32,14 @@ namespace ApiLocadora.Controllers
         {
             try
             {
-                var funcionario = await _service.GetOneById(id);
+                var genero = await _service.GetOneById(id);
 
-                if (funcionario is null)
+                if (genero is null)
                 {
                     return NotFound("Informacao nao encontrada!");
                 }
 
-                return Ok(funcionario);
+                return Ok(genero);
             }
             catch (Exception ex)
             {
@@ -48,18 +48,18 @@ namespace ApiLocadora.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] FuncionarioDto item)
+        public async Task<IActionResult> Post([FromBody] GeneroDto item)
         {
             try
             {
-                var funcionario = await _service.Create(item);
+                var genero = await _service.Create(item);
 
-                if (funcionario is null)
+                if (genero is null)
                 {
                     return Problem("Ocorreram erros ao salvar!");
                 }
 
-                return Created("", funcionario);
+                return Created("", genero);
             }
             catch (Exception ex)
             {
@@ -69,35 +69,35 @@ namespace ApiLocadora.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] FuncionarioDto item)
+        public async Task<IActionResult> Put(int id, [FromBody] GeneroDto item)
         {
             try
             {
-                var funcionario = await _service.Update(id, item);
+                var genero = await _service.Update(id, item);
 
-                if (funcionario is null)
+                if (genero is null)
                     return NotFound();
 
-                return Ok(funcionario);
+                return Ok(genero);
             }
             catch (Exception ex)
             {
                 return Problem(ex.Message);
             }
         }
-
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var funcionario = await _service.Delete(id);
+                var genero = await _service.Delete(id);
 
-                if (funcionario is null)
+                if (genero is null)
                 {
-                    return NotFound("Funcionario não encontrado!");
+                    return Problem("Genero não encontrado!");
                 }
-
+                
                 return NoContent();
             }
             catch (Exception ex)
@@ -105,5 +105,8 @@ namespace ApiLocadora.Controllers
                 return Problem(ex.Message);
             }
         }
+
+        
+        
     }
 }

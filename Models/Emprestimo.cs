@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("emprestimos")]
+    [Table("emprestimo")]
     public class Emprestimo
     {
         public int Id { get; set; }
@@ -21,6 +21,9 @@ namespace ApiLocadora.Models
 
         public virtual Cliente? Cliente { get; set; }
         
+        
         public virtual Funcionario? Funcionario { get; set; }
+        
+        public List<Livro> Livros { get; set; } = [];
     }
 }

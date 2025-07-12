@@ -96,7 +96,27 @@ namespace ApiLocadora.Services
 
         public async Task<Funcionario?> Delete(int id)
         {
-            return null;
+            try
+            {
+                var funcionario = await _context.Funcionarios
+                    .SingleOrDefaultAsync(x => x.Id == id);
+
+                if (funcionario is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Funcionarios.Remove(funcionario);
+                await _context.SaveChangesAsync();
+
+                return funcionario;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         private async Task<bool> Exist(int id)

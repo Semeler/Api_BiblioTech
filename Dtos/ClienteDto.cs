@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using ApiLocadora.Common.Validations;
 
+
 namespace ApiLocadora.Dtos
 {
     public class ClienteDto
@@ -28,7 +29,7 @@ namespace ApiLocadora.Dtos
         [Required]
         public required string Cidade { get; set; }
         
-        [Required]
-        public required DateOnly DataNascimento { get; set; }
+        
+        public required DateTime DataNascimento { get; set; }
     }
 }

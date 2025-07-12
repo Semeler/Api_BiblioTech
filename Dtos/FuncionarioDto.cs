@@ -16,7 +16,7 @@ namespace ApiLocadora.Dtos
         [Required]
         public required string Email { get; set; }
         [Required]
-        public required DateOnly DataAdmissao { get; set; }
+        public required DateTime DataAdmissao { get; set; }
         [Required]
         public required string Cep { get; set; }
         [Required]

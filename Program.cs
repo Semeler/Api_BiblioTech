@@ -23,14 +23,22 @@ var connectionString = builder.Configuration.GetConnectionString("default");
 builder.Services.AddDbContext<AppDbContext>(options => 
     options
         .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-        .UseSnakeCaseNamingConvention()
+        //.UseSnakeCaseNamingConvention()
 );
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("*");
+        });
+});
 
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<DevolucaoService>();
 builder.Services.AddScoped<EmprestimoService>();
 builder.Services.AddScoped<EstoqueService>();
-builder.Services.AddScoped<FilmeService>();
 builder.Services.AddScoped<FornecedorService>();
 builder.Services.AddScoped<FuncionarioService>();
 builder.Services.AddScoped<GeneroService>();
@@ -46,6 +54,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -85,11 +85,27 @@ namespace ApiLocadora.Controllers
                 return Problem(ex.Message);
             }
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var cliente = await _service.Delete(id);
 
-        //[HttpDelete("{id}")]
-        //public IActionResult Remover(Guid id)
-        //{
-        //    return Ok();
-        //}
+                if (cliente is null)
+                {
+                    return Problem("Cliente não encontrado!");
+                }
+                
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        
+        
     }
 }

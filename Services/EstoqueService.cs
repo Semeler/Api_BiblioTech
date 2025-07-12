@@ -87,7 +87,27 @@ namespace ApiLocadora.Services
 
         public async Task<Estoque?> Delete(int id)
         {
-            return null;
+            try
+            {
+                var estoque = await _context.Estoques
+                    .SingleOrDefaultAsync(x => x.Id == id);
+
+                if (estoque is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Estoques.Remove(estoque);
+                await _context.SaveChangesAsync();
+
+                return estoque;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         private async Task<bool> Exist(int id)

@@ -24,8 +24,7 @@ namespace ApiLocadora.Services
 
         public async Task<ICollection<Livro>> GetAll()
         {
-            var list = await _context.Livros.Include(e => e.Genero)
-                .ToListAsync();
+            var list = await _context.Livros.ToListAsync();
 
             return list;
         }
@@ -74,7 +73,6 @@ namespace ApiLocadora.Services
                 _livro.Titulo = livro.Titulo;
                 _livro.Autor = livro.Autor;
                 _livro.Isbn = livro.Isbn;
-                _livro.Isbn = livro.Isbn;
                 _livro.Editora = livro.Editora;
                 _livro.Sinopse = livro.Sinopse;
                 
@@ -90,11 +88,35 @@ namespace ApiLocadora.Services
             
         }
 
+        //public async Task<Livro?> Delete(int id)
+        //{
+        //    return null;
+        //}
+
         public async Task<Livro?> Delete(int id)
         {
-            return null;
-        }
+            try
+            {
+                var livro = await _context.Livros
+                    .SingleOrDefaultAsync(x => x.Id == id);
 
+                if (livro is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Livros.Remove(livro);
+                await _context.SaveChangesAsync();
+
+                return livro;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
         private async Task<bool> Exist(int id)
         {
             return await _context.Livros.AnyAsync(c => c.Id == id);

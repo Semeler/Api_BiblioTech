@@ -13,7 +13,7 @@ namespace ApiLocadora.Dtos
         public required string Genero { get; set; }
         
         [Required]
-        public required DateOnly AnoLancamento { get; set; }
+        public required DateTime AnoLancamento { get; set; }
 
         [Required]
         [CheckExist]

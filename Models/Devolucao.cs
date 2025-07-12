@@ -15,9 +15,15 @@ namespace ApiLocadora.Models
         public int? FuncionarioId { get; set; }
         [JsonIgnore]
         public int? ClienteId { get; set; }
+        
+        
 
         public virtual Funcionario? Funcionario { get; set; }
         
         public virtual Cliente? Cliente { get; set; }
+        
+        public List<Livro> Livros { get; set; } = [];
+        
+        
     }
 }

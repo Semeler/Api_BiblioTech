@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("funcionarios")]
+    [Table("funcionario")]
     public class Funcionario
     {
         public int Id { get; set; }
@@ -31,5 +31,9 @@ namespace ApiLocadora.Models
         public required string Cidade { get; set; }
 
         public DateOnly? DataAdmissao { get; set; }
+        
+        public List<Emprestimo>? Emprestimos { get; set; } = [];
+        
+        public List<Devolucao>? Devolucoes { get; set; } = [];
     }
 }

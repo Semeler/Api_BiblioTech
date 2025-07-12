@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("fornecedores")]
+    [Table("fornecedore")]
     public class Fornecedor
     {
         public int Id { get; set; }
@@ -25,6 +25,8 @@ namespace ApiLocadora.Models
         public required string Cidade { get; set; }
 
         public DateOnly? AnoLancamento { get; set; }
+        
+        public List<Livro>? Livros { get; set; } = [];
 
      
     }

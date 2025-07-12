@@ -24,7 +24,7 @@ namespace ApiLocadora.Services
 
         public async Task<ICollection<Devolucao>> GetAll()
         {
-            var list = await _context.Devolucaos.Include(e => e.Cliente)
+            var list = await _context.Devolucoes.Include(e => e.Cliente)
                 .Include(e => e.Funcionario).ToListAsync();
 
             return list;
@@ -34,7 +34,7 @@ namespace ApiLocadora.Services
         {
             try
             {
-                return await _context.Devolucaos
+                return await _context.Devolucoes
                     .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace ApiLocadora.Services
             {
                 var newDevolucao = _mapper.Map<Devolucao>(devolucao);
 
-                await _context.Devolucaos.AddAsync(newDevolucao);
+                await _context.Devolucoes.AddAsync(newDevolucao);
                 await _context.SaveChangesAsync();
 
                 return newDevolucao;
@@ -73,7 +73,7 @@ namespace ApiLocadora.Services
 
                 _devolucao.Multa = devolucao.Multa;
                 
-                _context.Devolucaos.Update(_devolucao);
+                _context.Devolucoes.Update(_devolucao);
                 await _context.SaveChangesAsync();
 
                 return _devolucao;
@@ -87,12 +87,32 @@ namespace ApiLocadora.Services
 
         public async Task<Devolucao?> Delete(int id)
         {
-            return null;
+            try
+            {
+                var devolucao = await _context.Devolucoes
+                    .SingleOrDefaultAsync(x => x.Id == id);
+
+                if (devolucao is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Devolucoes.Remove(devolucao);
+                await _context.SaveChangesAsync();
+
+                return devolucao;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         private async Task<bool> Exist(int id)
         {
-            return await _context.Devolucaos.AnyAsync(c => c.Id == id);
+            return await _context.Devolucoes.AnyAsync(c => c.Id == id);
         }
     }
 }

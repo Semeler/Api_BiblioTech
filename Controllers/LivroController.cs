@@ -36,7 +36,7 @@ namespace ApiLocadora.Controllers
 
                 if (livro is null)
                 {
-                    return NotFound("Informacao não encontrada!");
+                    return NotFound("Informação não encontrada!");
                 }
 
                 return Ok(livro);
@@ -86,10 +86,24 @@ namespace ApiLocadora.Controllers
             }
         }
 
-        //[HttpDelete("{id}")]
-        //public IActionResult Remover(Guid id)
-        //{
-        //    return Ok();
-        //}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var livro = await _service.Delete(id);
+
+                if (livro is null)
+                {
+                    return NotFound("Livro não encontrado!");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
     }
 }

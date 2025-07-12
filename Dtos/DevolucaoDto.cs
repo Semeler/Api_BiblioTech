@@ -8,6 +8,6 @@ namespace ApiLocadora.Dtos
         [Required]
         public required float Multa { get; set; }
         [Required]
-        public required DateOnly DataDevolucao { get; set; }
+        public required DateTime DataDevolucao { get; set; }
     }
 }

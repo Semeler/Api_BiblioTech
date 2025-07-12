@@ -17,10 +17,10 @@ namespace ApiLocadora.Dtos
         [Required]
         public required string Autor { get; set; }
         [Required]
-        public required DateOnly AnoPublicacao { get; set; }
+        public required DateTime AnoPublicacao { get; set; }
         
         [Required]
-        [CheckExist]
+        //[CheckExist]
         public int GeneroId { get; set; }
     }
 }

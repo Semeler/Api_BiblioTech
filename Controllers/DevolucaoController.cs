@@ -86,10 +86,25 @@ namespace ApiLocadora.Controllers
             }
         }
 
-        //[HttpDelete("{id}")]
-        //public IActionResult Remover(Guid id)
-        //{
-        //    return Ok();
-        //}
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var devolucao = await _service.Delete(id);
+
+                if (devolucao is null)
+                {
+                    return NotFound("Devolução não encontrada!");
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
     }
 }

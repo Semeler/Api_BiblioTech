@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiLocadora.Models
 {
-    [Table("generos")]
+    [Table("genero")]
     public class Genero
     {
         public int Id { get; set; }
@@ -11,6 +11,8 @@ namespace ApiLocadora.Models
         public required string Nome { get; set; }
 
         public required string Descricao { get; set; }
+        
+        public List<Livro> Livros { get; set; } = [];
         
     }
 }

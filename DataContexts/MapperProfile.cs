@@ -49,13 +49,11 @@ namespace ApiLocadora.DataContexts
                         src => new DateOnly(src.AnoPublicacao.Year, src.AnoPublicacao.Month, src.AnoPublicacao.Day)
                     )
                 );
-            CreateMap<FuncionarioDto, Funcionario>()
-                .ForMember(
-                    dest => dest.DataAdmissao, 
-                    opt => opt.MapFrom(
-                        src => new DateOnly(src.DataAdmissao.Year, src.DataAdmissao.Month, src.DataAdmissao.Day)
-                    )
-                );
+            CreateMap<GeneroDto, Genero>();
+            
+            CreateMap<FornecedorDto, Fornecedor>();
+            
+            CreateMap<EstoqueDto, Estoque>();
         }
     }
 }

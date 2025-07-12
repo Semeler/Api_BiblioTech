@@ -74,7 +74,6 @@ namespace ApiLocadora.Services
                 _cliente.Cpf = cliente.Cpf;
                 _cliente.Telefone = cliente.Telefone;
                 _cliente.Email = cliente.Email;
-                _cliente.DataNascimento = cliente.DataNascimento;
                 _cliente.Cep = cliente.Cep;
                 _cliente.Rua = cliente.Rua;
                 _cliente.Bairro = cliente.Bairro;
@@ -94,14 +93,40 @@ namespace ApiLocadora.Services
             
         }
 
+        //public async Task<Cliente?> Delete(int id)
+        //{
+        //    return null;
+        //}
+
+        
         public async Task<Cliente?> Delete(int id)
         {
-            return null;
-        }
+            try
+            {
+                var cliente = await _context.Clientes
+                    .SingleOrDefaultAsync(x => x.Id == id);
 
-        public async Task<bool> Exist(int id)
+                if (cliente is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Clientes.Remove(cliente);
+                await _context.SaveChangesAsync();
+
+                return cliente;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+        
+        public bool Exist(int id)
         {
-            return await _context.Clientes.AnyAsync(c => c.Id == id);
+            return _context.Clientes.Any(c => c.Id == id);
         }
     }
 }

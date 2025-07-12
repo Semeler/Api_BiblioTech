@@ -85,11 +85,37 @@ namespace ApiLocadora.Services
             
         }
 
+        //public async Task<Emprestimo?> Delete(int id)
+        //{
+        //    return null;
+        //}
+
         public async Task<Emprestimo?> Delete(int id)
         {
-            return null;
-        }
+            try
+            {
+                var emprestimo = await _context.Emprestimos
+                    .SingleOrDefaultAsync(x => x.Id == id);
 
+                if (emprestimo is null)
+                {
+                    return null;
+                }
+                
+
+                _context.Emprestimos.Remove(emprestimo);
+                await _context.SaveChangesAsync();
+
+                return emprestimo;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+        }
+        
+        
         private async Task<bool> Exist(int id)
         {
             return await _context.Emprestimos.AnyAsync(c => c.Id == id);
