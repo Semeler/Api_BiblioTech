@@ -24,7 +24,7 @@ namespace ApiLocadora.Services
 
         public async Task<ICollection<Genero>> GetAll()
         {
-            var list = await _context.Generos.ToListAsync();
+            var list = await _context.Generos.Include(e => e.Livros).ToListAsync();
 
             return list;
         }
@@ -33,7 +33,7 @@ namespace ApiLocadora.Services
         {
             try
             {
-                return await _context.Generos
+                return await _context.Generos.Include(e => e.Livros)
                     .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)

@@ -44,14 +44,19 @@ namespace ApiLocadora.DataContexts
                 );
             CreateMap<LivroDto, Livro>()
                 .ForMember(
-                    dest => dest.AnoPublicacao, 
-                    opt => opt.MapFrom(
-                        src => new DateOnly(src.AnoPublicacao.Year, src.AnoPublicacao.Month, src.AnoPublicacao.Day)
+                    dest => dest.AnoPublicacao,
+                    opt => opt.MapFrom(src =>
+                        new DateOnly(src.AnoPublicacao.Year, src.AnoPublicacao.Month, src.AnoPublicacao.Day)
                     )
+                )
+                .ForMember(dest => dest.GeneroId, opt => opt.MapFrom(src => src.GeneroId)
                 );
+                
+
             CreateMap<GeneroDto, Genero>();
-            
-            CreateMap<FornecedorDto, Fornecedor>();
+
+            CreateMap<Fornecedor, Fornecedor>();
+                
             
             CreateMap<EstoqueDto, Estoque>();
         }

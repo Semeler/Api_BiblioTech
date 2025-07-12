@@ -24,7 +24,7 @@ namespace ApiLocadora.Services
 
         public async Task<ICollection<Livro>> GetAll()
         {
-            var list = await _context.Livros.ToListAsync();
+            var list = await _context.Livros.Include(e => e.Fornecedores).ToListAsync();
 
             return list;
         }
@@ -42,23 +42,47 @@ namespace ApiLocadora.Services
             }
         }
 
-        public async Task<Livro?> Create(LivroDto livro)
+        //public async Task<Livro?> Create(LivroDto livro)
+        //{
+        //    try
+        //    {
+        //        var newLivro = _mapper.Map<Livro>(livro);
+        //  
+        //        await _context.Livros.AddAsync(newLivro);
+        //        await _context.SaveChangesAsync();
+
+        //        return newLivro;
+        //    }   
+        //    catch (Exception ex)
+        //    { 
+        //        throw ex;
+        //    }
+        //}
+
+        public async Task<Livro?> Create(LivroDto livroDto)
         {
-            try
+            if (livroDto.GeneroId > 0) // Verifica se foi informado um ID de gênero
             {
-                var newLivro = _mapper.Map<Livro>(livro);
-
-                await _context.Livros.AddAsync(newLivro);
-                await _context.SaveChangesAsync();
-
-                return newLivro;
-            }   
-            catch (Exception ex)
-            { 
-                throw ex;
+                var genero = await _context.Generos
+                    .FirstOrDefaultAsync(g => g.Id == livroDto.GeneroId);
+                
+                if (genero == null)
+                {
+                    throw new Exception($"Gênero com ID {livroDto.GeneroId} não encontrado");
+                }
             }
-        }
+            
+            
+            var livro = _mapper.Map<Livro>(livroDto);
         
+            await _context.Livros.AddAsync(livro);
+            await _context.SaveChangesAsync();
+
+            return await GetOneById(livro.Id);
+        }
+
+
+
         public async Task<Livro?> Update(int id, LivroDto livro)
         {
             try
@@ -75,6 +99,7 @@ namespace ApiLocadora.Services
                 _livro.Isbn = livro.Isbn;
                 _livro.Editora = livro.Editora;
                 _livro.Sinopse = livro.Sinopse;
+                _livro.GeneroId = livro.GeneroId;
                 
                 _context.Livros.Update(_livro);
                 await _context.SaveChangesAsync();

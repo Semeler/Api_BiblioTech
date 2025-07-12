@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using ApiLocadora.Common.Validations;
+using ApiLocadora.Models;
 
 namespace ApiLocadora.Dtos
 {
@@ -22,5 +23,13 @@ namespace ApiLocadora.Dtos
         [Required]
         //[CheckExist]
         public int GeneroId { get; set; }
+        
+        
+        
+       
+        
+       
+        
+        
     }
 }

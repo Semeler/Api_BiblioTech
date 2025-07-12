@@ -14,10 +14,10 @@ namespace ApiLocadora.Models
         public required string Editora { get; set; }
         public required string Sinopse { get; set; }
         public DateOnly? AnoPublicacao { get; set; }
-        [JsonIgnore]
+        
         public int? GeneroId { get; set; }
-
-        public virtual Genero? Genero { get; set; }
+        [JsonIgnore]
+        public Genero? Genero { get; set; }
         
         
         public List<Fornecedor> Fornecedores { get; set; } = [];

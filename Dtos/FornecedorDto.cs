@@ -26,7 +26,8 @@ namespace ApiLocadora.Dtos
         public required string Estado { get; set; }
         [Required]
         public required string Cidade { get; set; }
-       
+        
+        
         
     }
 }

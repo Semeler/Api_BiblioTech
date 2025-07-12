@@ -69,6 +69,7 @@ namespace ApiLocadora.DataContexts
                     r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId")
                 );
 
+
             // Configuração Devolução
             modelBuilder.Entity<Devolucao>()
                 .HasOne(d => d.Cliente)
