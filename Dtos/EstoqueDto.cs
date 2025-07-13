@@ -12,7 +12,7 @@ namespace ApiLocadora.Dtos
         public required string CodigoDeBarras { get; set; }
         
         [Required]
-        [CheckExist]
+        
         public int LivroId { get; set; }
      
     }

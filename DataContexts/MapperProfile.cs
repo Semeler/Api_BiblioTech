@@ -23,23 +23,21 @@ namespace ApiLocadora.DataContexts
                     )
                 )
                 .ForMember(
-                dest => dest.DataPrevista,
-                opt => opt.MapFrom(
-                    src => new DateOnly(src.DataPrevista.Year, src.DataPrevista.Month, src.DataPrevista.Day)
-                )
-            );
+                    dest => dest.DataPrevista,
+                    opt => opt.MapFrom(
+                        src => new DateOnly(src.DataPrevista.Year, src.DataPrevista.Month, src.DataPrevista.Day)
+                    )
+                ).ForMember(
+                    dest => dest.DataDevolucao,
+                    opt => opt.MapFrom(
+                        src => new DateOnly(src.DataDevolucao.Year, src.DataDevolucao.Month, src.DataDevolucao.Day)
+                    )
+                );
             CreateMap<FuncionarioDto, Funcionario>()
                 .ForMember(
                     dest => dest.DataAdmissao, 
                     opt => opt.MapFrom(
                         src => new DateOnly(src.DataAdmissao.Year, src.DataAdmissao.Month, src.DataAdmissao.Day)
-                    )
-                );
-            CreateMap<DevolucaoDto, Devolucao>()
-                .ForMember(
-                    dest => dest.DataDevolucao, 
-                    opt => opt.MapFrom(
-                        src => new DateOnly(src.DataDevolucao.Year, src.DataDevolucao.Month, src.DataDevolucao.Day)
                     )
                 );
             CreateMap<LivroDto, Livro>()
@@ -55,7 +53,7 @@ namespace ApiLocadora.DataContexts
 
             CreateMap<GeneroDto, Genero>();
 
-            CreateMap<Fornecedor, Fornecedor>();
+            CreateMap<FornecedorDto, Fornecedor>();
                 
             
             CreateMap<EstoqueDto, Estoque>();

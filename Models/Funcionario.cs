@@ -34,6 +34,6 @@ namespace ApiLocadora.Models
         
         public List<Emprestimo>? Emprestimos { get; set; } = [];
         
-        public List<Devolucao>? Devolucoes { get; set; } = [];
+        
     }
 }

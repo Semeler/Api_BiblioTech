@@ -25,7 +25,6 @@ namespace ApiLocadora.Dtos
         public int GeneroId { get; set; }
         
         
-        
        
         
        

@@ -36,7 +36,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<ClienteService>();
-builder.Services.AddScoped<DevolucaoService>();
 builder.Services.AddScoped<EmprestimoService>();
 builder.Services.AddScoped<EstoqueService>();
 builder.Services.AddScoped<FornecedorService>();

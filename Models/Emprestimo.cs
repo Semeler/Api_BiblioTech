@@ -12,6 +12,8 @@ namespace ApiLocadora.Models
         
         public DateOnly? DataPrevista { get; set; }
         
+        public DateOnly? DataDevolucao { get; set; }
+        
         public bool Status { get; set; }    
 
         [JsonIgnore]

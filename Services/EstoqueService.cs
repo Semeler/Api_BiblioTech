@@ -33,7 +33,7 @@ namespace ApiLocadora.Services
         {
             try
             {
-                return await _context.Estoques 
+                return await _context.Estoques.Include(e => e.Livro)
                     .SingleOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception ex)
@@ -46,6 +46,17 @@ namespace ApiLocadora.Services
         {
             try
             {
+                if (estoque.LivroId > 0) // Verifica se foi informado um ID de gênero
+                {
+                    var livro = await _context.Livros
+                        .FirstOrDefaultAsync(g => g.Id == estoque.LivroId);
+                
+                    if (livro == null)
+                    {
+                        throw new Exception($"Gênero com ID {estoque.LivroId} não encontrado");
+                    }
+                }
+                
                 var newEstoque = _mapper.Map<Estoque>(estoque);
 
                 await _context.Estoques.AddAsync(newEstoque);

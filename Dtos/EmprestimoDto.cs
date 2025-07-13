@@ -14,6 +14,8 @@ namespace ApiLocadora.Dtos
         [Required]
         public required DateTime DataPrevista { get; set; }
         
+        public DateTime DataDevolucao { get; set; }
+        
         [Required]
         [CheckExist]
         public int ClienteId { get; set; }

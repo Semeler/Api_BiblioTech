@@ -12,7 +12,7 @@ namespace ApiLocadora.Models
         public required string CodigoDeBarras { get; set; }
         
         public int? LivroId { get; set; }
-
+        [JsonIgnore]
         public Livro? Livro { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace ApiLocadora.DataContexts
         public DbSet<Emprestimo> Emprestimos { get; set; }
         public DbSet<Funcionario> Funcionarios { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
-        public DbSet<Devolucao> Devolucoes { get; set; }
+        
         public DbSet<Estoque> Estoques { get; set; }
         public DbSet<Livro> Livros { get; set; }
         public DbSet<Genero> Generos { get; set; }
@@ -66,42 +66,10 @@ namespace ApiLocadora.DataContexts
                 .UsingEntity(
                     "FornecedorLivro",
                     l => l.HasOne(typeof(Fornecedor)).WithMany().HasForeignKey("FornecedorId"),
-                    r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId")
+                    r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId"),
+                    j => j.ToTable("FornecedorLivro")
                 );
-
-
-            // Configuração Devolução
-            modelBuilder.Entity<Devolucao>()
-                .HasOne(d => d.Cliente)
-                .WithMany(c => c.Devolucoes)
-                .HasForeignKey(d => d.ClienteId)
-                .IsRequired(false);
-
-            modelBuilder.Entity<Devolucao>()
-                .HasOne(d => d.Funcionario)
-                .WithMany(f => f.Devolucoes)
-                .HasForeignKey(d => d.FuncionarioId)
-                .IsRequired(false);
-
-            // Relacionamento many-to-many entre Livro e Devolução
-            modelBuilder.Entity<Livro>()
-                .HasMany(l => l.Devolucoes)
-                .WithMany(d => d.Livros)
-                .UsingEntity(
-                    "DevolucaoLivros",
-                    l => l.HasOne(typeof(Devolucao)).WithMany().HasForeignKey("DevolucaoId"),
-                    r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId")
-                );
-
-            // Relacionamento many-to-many entre Cliente e Livro (Favoritos)
-            modelBuilder.Entity<Livro>()
-                .HasMany(l => l.Clientes)
-                .WithMany(c => c.Livros)
-                .UsingEntity(
-                    "ClienteLivroFavorito",
-                    l => l.HasOne(typeof(Cliente)).WithMany().HasForeignKey("ClienteId"),
-                    r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId")
-                );
+            
         
 
                     

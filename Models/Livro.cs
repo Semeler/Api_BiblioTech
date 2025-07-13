@@ -16,13 +16,13 @@ namespace ApiLocadora.Models
         public DateOnly? AnoPublicacao { get; set; }
         
         public int? GeneroId { get; set; }
+        
         [JsonIgnore]
         public Genero? Genero { get; set; }
         
         
         public List<Fornecedor> Fornecedores { get; set; } = [];
         
-        public List<Devolucao> Devolucoes { get; set; } = [];
         
         public List<Emprestimo> Emprestimos { get; set; } = [];
         

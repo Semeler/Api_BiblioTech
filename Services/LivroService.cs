@@ -24,7 +24,11 @@ namespace ApiLocadora.Services
 
         public async Task<ICollection<Livro>> GetAll()
         {
-            var list = await _context.Livros.Include(e => e.Fornecedores).ToListAsync();
+            var list = await _context.Livros
+                .Include(e => e.Fornecedores)
+                .Include(e => e.Genero)
+                .Include(e => e.Estoques)
+                .ToListAsync();
 
             return list;
         }

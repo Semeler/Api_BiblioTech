@@ -22,6 +22,7 @@ namespace ApiLocadora.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            
             var listaLivros = await _service.GetAll();
 
             return Ok(listaLivros);
