@@ -8,10 +8,10 @@ using ApiLocadora.Services;
 
 namespace ApiLocadora.Controllers
 {
-    [Route("generos")]
-    [ApiController]
-    public class GeneroController : ControllerBase
-    {
+        [Route("generos")]
+        [ApiController]
+        public class GeneroController : ControllerBase
+        {
         private readonly GeneroService _service;
 
         public GeneroController(GeneroService service)
@@ -19,12 +19,18 @@ namespace ApiLocadora.Controllers
             _service = service;
         }
 
-        [HttpGet]
+    [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var listaGeneros = await _service.GetAll();
-
-            return Ok(listaGeneros);
+            try
+            {
+                var listaGeneros = await _service.GetAll();
+                return Ok(listaGeneros);
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
         }
 
         [HttpGet("{id}")]
@@ -36,7 +42,7 @@ namespace ApiLocadora.Controllers
 
                 if (genero is null)
                 {
-                    return NotFound("Informacao nao encontrada!");
+                    return NotFound("Informação não encontrada!");
                 }
 
                 return Ok(genero);
@@ -65,7 +71,6 @@ namespace ApiLocadora.Controllers
             {
                 return Problem(ex.Message);
             }
-
         }
 
         [HttpPut("{id}")]
@@ -76,7 +81,9 @@ namespace ApiLocadora.Controllers
                 var genero = await _service.Update(id, item);
 
                 if (genero is null)
-                    return NotFound();
+                {
+                    return NotFound("Gênero não encontrado!");
+                }
 
                 return Ok(genero);
             }
@@ -85,7 +92,7 @@ namespace ApiLocadora.Controllers
                 return Problem(ex.Message);
             }
         }
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
@@ -95,9 +102,9 @@ namespace ApiLocadora.Controllers
 
                 if (genero is null)
                 {
-                    return Problem("Genero não encontrado!");
+                    return NotFound("Gênero não encontrado!");
                 }
-                
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -105,6 +112,7 @@ namespace ApiLocadora.Controllers
                 return Problem(ex.Message);
             }
         }
+
 
         
         

@@ -22,97 +22,126 @@ namespace ApiLocadora.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Genero>> GetAll()
-        {
-            var list = await _context.Generos.Include(e => e.Livros).ToListAsync();
-
-            return list;
-        }
-
-        public async Task<Genero?> GetOneById(int id)
-        {
-            try
+        public async Task<ICollection<object>> GetAll()
+    {
+        var list = await _context.Generos
+            .Include(e => e.Livros)
+            .Select(g => new
             {
-                return await _context.Generos.Include(e => e.Livros)
-                    .SingleOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        public async Task<Genero?> Create(GeneroDto genero)
-        {
-            try
-            {
-                var newGenero = _mapper.Map<Genero>(genero);
-
-                await _context.Generos.AddAsync(newGenero);
-                await _context.SaveChangesAsync();
-
-                return newGenero;
-            }   
-            catch (Exception ex)
-            { 
-                throw ex;
-            }
-        }
-        
-        public async Task<Genero?> Update(int id, GeneroDto genero)
-        {
-            try
-            {
-                var _genero = await GetOneById(id);
-
-                if (_genero is null)
+                g.Id,
+                g.Nome,
+                g.Descricao,
+                Livros = g.Livros.Select(l => new
                 {
-                    return _genero;
-                }
+                    l.Id,
+                    l.Titulo
+                }).ToList()
+            })
+            .ToListAsync();
 
-                _genero.Nome = genero.Nome;
-                _genero.Descricao = genero.Descricao;;
-                
-                _context.Generos.Update(_genero);
-                await _context.SaveChangesAsync();
+        return list.Cast<object>().ToList();
+    }
 
-                return _genero;
-            }
-            catch (Exception ex)
+    public async Task<object?> GetOneById(int id)
+    {
+        return await _context.Generos
+            .Include(e => e.Livros)
+            .Where(x => x.Id == id)
+            .Select(g => new
             {
-                    throw ex;
-            }
-            
-        }
-
-        public async Task<Genero?> Delete(int id)
-        {
-            try
-            {
-                var genero = await _context.Generos
-                    .SingleOrDefaultAsync(x => x.Id == id);
-
-                if (genero is null)
+                g.Id,
+                g.Nome,
+                g.Descricao,
+                Livros = g.Livros.Select(l => new
                 {
-                    return null;
-                }
-                
+                    l.Id,
+                    l.Titulo
+                }).ToList()
+            })
+            .SingleOrDefaultAsync();
+    }
 
-                _context.Generos.Remove(genero);
-                await _context.SaveChangesAsync();
-
-                return genero;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            
-        }
-
-        private async Task<bool> Exist(int id)
+    public async Task<object?> Create(GeneroDto genero)
+    {
+        try
         {
-            return await _context.Generos.AnyAsync(c => c.Id == id);
+            var newGenero = _mapper.Map<Genero>(genero);
+
+            await _context.Generos.AddAsync(newGenero);
+            await _context.SaveChangesAsync();
+
+            return await GetOneById(newGenero.Id);
+        }   
+        catch (Exception)
+        { 
+            throw;
         }
+    }
+    
+    public async Task<object?> Update(int id, GeneroDto genero)
+    {
+        try
+        {
+            var _genero = await _context.Generos
+                .Include(g => g.Livros)
+                .SingleOrDefaultAsync(x => x.Id == id);
+
+            if (_genero is null)
+            {
+                return null;
+            }
+
+            _genero.Nome = genero.Nome;
+            _genero.Descricao = genero.Descricao;
+            
+            _context.Generos.Update(_genero);
+            await _context.SaveChangesAsync();
+
+            return await GetOneById(_genero.Id);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<object?> Delete(int id)
+    {
+        try
+        {
+            var genero = await _context.Generos
+                .Include(g => g.Livros)
+                .SingleOrDefaultAsync(x => x.Id == id);
+
+            if (genero is null)
+            {
+                return null;
+            }
+
+            _context.Generos.Remove(genero);
+            await _context.SaveChangesAsync();
+
+            return new
+            {
+                genero.Id,
+                genero.Nome,
+                genero.Descricao,
+                Livros = genero.Livros.Select(l => new
+                {
+                    l.Id,
+                    l.Titulo
+                }).ToList()
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    
+
+
+
     }
 }

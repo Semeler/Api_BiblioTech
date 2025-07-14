@@ -14,7 +14,7 @@ namespace ApiLocadora.Models
         
         public DateOnly? DataDevolucao { get; set; }
         
-        public bool Status { get; set; }    
+        public string Status { get; set; }  = "Em Andamento";  
 
         [JsonIgnore]
         public int? ClienteId { get; set; }

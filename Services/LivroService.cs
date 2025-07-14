@@ -20,7 +20,7 @@ namespace ApiLocadora.Services
             _context = context;
             _mapper = mapper;
         }
-        
+
         public async Task<ICollection<object>> GetAll()
         {
             var list = await _context.Livros
@@ -37,17 +37,16 @@ namespace ApiLocadora.Services
                     l.Editora,
                     l.Sinopse,
                     l.AnoPublicacao,
-                    Genero = l.Genero == null ? null : new
-                    {
-                        l.Genero.Id,
-                        l.Genero.Nome
-                    },
+                    Genero = l.Genero == null
+                        ? null
+                        : new
+                        {
+                            l.Genero.Id,
+                            l.Genero.Nome
+                        },
                     Emprestimos = l.Emprestimos.Select(e => new
                     {
                         e.Id,
-                        e.DataInicio,
-                        e.DataPrevista,
-                        e.DataDevolucao,
                         e.Status
                     }).ToList(),
                     Fornecedores = l.Fornecedores.Select(f => new
@@ -60,6 +59,7 @@ namespace ApiLocadora.Services
                     {
                         e.Id,
                         e.Quantidade,
+                        e.CodigoDeBarras
                     }).ToList()
                 })
                 .ToListAsync();
@@ -67,13 +67,56 @@ namespace ApiLocadora.Services
             return list.Cast<object>().ToList();
         }
 
-        
+        public async Task<object?> GetOneById(int id)
+        {
+            return await _context.Livros
+                .Include(l => l.Genero)
+                .Include(l => l.Emprestimos)
+                .Include(l => l.Fornecedores)
+                .Include(l => l.Estoques)
+                .Where(x => x.Id == id)
+                .Select(l => new
+                {
+                    l.Id,
+                    l.Titulo,
+                    l.Autor,
+                    l.Isbn,
+                    l.Editora,
+                    l.Sinopse,
+                    l.AnoPublicacao,
+                    Genero = l.Genero == null
+                        ? null
+                        : new
+                        {
+                            l.Genero.Id,
+                            l.Genero.Nome
+                        },
+                    Emprestimos = l.Emprestimos.Select(e => new
+                    {
+                        e.Id,
+                        e.Status
+                    }).ToList(),
+                    Fornecedores = l.Fornecedores.Select(f => new
+                    {
+                        f.Id,
+                        f.Nome,
+                        f.Cnpj
+                    }).ToList(),
+                    Estoques = l.Estoques.Select(e => new
+                    {
+                        e.Id,
+                        e.Quantidade,
+                        e.CodigoDeBarras
+                    }).ToList()
+                })
+                .SingleOrDefaultAsync();
+        }
+
         public async Task<object?> Create(LivroDto livroDto)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Verifica se o gênero existe
                 if (livroDto.GeneroId.HasValue)
                 {
                     var genero = await _context.Generos
@@ -86,7 +129,7 @@ namespace ApiLocadora.Services
                 }
 
                 var livro = _mapper.Map<Livro>(livroDto);
-                
+
                 await _context.Livros.AddAsync(livro);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -107,10 +150,9 @@ namespace ApiLocadora.Services
             {
                 var livro = await _context.Livros
                     .SingleOrDefaultAsync(x => x.Id == id);
-                
+
                 if (livro == null) return null;
 
-                // Verifica se o gênero existe
                 if (livroDto.GeneroId.HasValue)
                 {
                     var genero = await _context.Generos
@@ -122,15 +164,15 @@ namespace ApiLocadora.Services
                     }
                 }
 
-                // Atualiza as propriedades básicas
                 livro.Titulo = livroDto.Titulo;
                 livro.Autor = livroDto.Autor;
                 livro.Isbn = livroDto.Isbn;
                 livro.Editora = livroDto.Editora;
                 livro.Sinopse = livroDto.Sinopse;
-                livro.AnoPublicacao = new DateOnly(livroDto.AnoPublicacao.Year, 
-                                                 livroDto.AnoPublicacao.Month,
-                                                 livroDto.AnoPublicacao.Day);
+                livro.AnoPublicacao = new DateOnly(
+                    livroDto.AnoPublicacao.Year,
+                    livroDto.AnoPublicacao.Month,
+                    livroDto.AnoPublicacao.Day);
                 livro.GeneroId = livroDto.GeneroId;
 
                 _context.Livros.Update(livro);
@@ -144,47 +186,6 @@ namespace ApiLocadora.Services
                 await transaction.RollbackAsync();
                 throw;
             }
-        }
-
-        // O método GetOneById também precisa ser atualizado para incluir as listas de relacionamentos
-        public async Task<object?> GetOneById(int id)
-        {
-            return await _context.Livros
-                .Include(l => l.Genero)
-                .Include(l => l.Emprestimos)
-                .Include(l => l.Fornecedores)
-                .Include(l => l.Estoques)
-                .Where(x => x.Id == id)
-                .Select(l => new
-                {
-                    l.Id,
-                    l.Titulo,
-                    l.Autor,
-                    l.Isbn,
-                    l.Editora,
-                    l.Sinopse,
-                    l.AnoPublicacao,
-                    Genero = l.Genero == null ? null : new
-                    {
-                        l.Genero.Id,
-                        l.Genero.Nome
-                    },
-                    Emprestimos = l.Emprestimos.Select(e => new
-                    {
-                        e.Id,
-                        e.DataInicio,
-                        e.DataPrevista,
-                        e.DataDevolucao,
-                        e.Status
-                    }).ToList(),
-                    Fornecedores = l.Fornecedores.Select(f => new
-                    {
-                        f.Id,
-                        f.Nome,
-                        f.Cnpj
-                    }).ToList()
-                })
-                .SingleOrDefaultAsync();
         }
 
         public async Task<object?> Delete(int id)
@@ -204,27 +205,12 @@ namespace ApiLocadora.Services
                     return null;
                 }
 
-                // Verifica se há empréstimos ativos
-                if (livro.Emprestimos.Any(e => e.Status))
+                if (livro.Emprestimos.Any(e => e.Status == "Em Andamento" || e.Status == "Atrasado"))
                 {
                     throw new Exception("Não é possível excluir um livro com empréstimos ativos");
                 }
 
-                // Limpa os relacionamentos
-                livro.Emprestimos.Clear();
-                livro.Fornecedores.Clear();
-
-                // Remove os estoques relacionados
-                _context.Estoques.RemoveRange(livro.Estoques);
-        
-                await _context.SaveChangesAsync();
-
-                // Remove o livro
-                _context.Livros.Remove(livro);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new
+                var result = new
                 {
                     livro.Id,
                     livro.Titulo,
@@ -233,17 +219,16 @@ namespace ApiLocadora.Services
                     livro.Editora,
                     livro.Sinopse,
                     livro.AnoPublicacao,
-                    Genero = livro.Genero == null ? null : new
-                    {
-                        livro.Genero.Id,
-                        livro.Genero.Nome
-                    },
+                    Genero = livro.Genero == null
+                        ? null
+                        : new
+                        {
+                            livro.Genero.Id,
+                            livro.Genero.Nome
+                        },
                     Emprestimos = livro.Emprestimos.Select(e => new
                     {
                         e.Id,
-                        e.DataInicio,
-                        e.DataPrevista,
-                        e.DataDevolucao,
                         e.Status
                     }).ToList(),
                     Fornecedores = livro.Fornecedores.Select(f => new
@@ -251,8 +236,25 @@ namespace ApiLocadora.Services
                         f.Id,
                         f.Nome,
                         f.Cnpj
+                    }).ToList(),
+                    Estoques = livro.Estoques.Select(e => new
+                    {
+                        e.Id,
+                        e.Quantidade,
+                        e.CodigoDeBarras
                     }).ToList()
                 };
+
+                livro.Emprestimos.Clear();
+                livro.Fornecedores.Clear();
+                _context.Estoques.RemoveRange(livro.Estoques);
+                await _context.SaveChangesAsync();
+
+                _context.Livros.Remove(livro);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return result;
             }
             catch (Exception)
             {
@@ -260,7 +262,5 @@ namespace ApiLocadora.Services
                 throw;
             }
         }
-
     }
-
 }

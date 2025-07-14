@@ -42,9 +42,6 @@ namespace ApiLocadora.Services
                 Emprestimos = c.Emprestimos.Select(e => new
                 {
                     e.Id,
-                    e.DataInicio,
-                    e.DataPrevista,
-                    e.DataDevolucao,
                     e.Status
                 }).ToList()
             })
@@ -75,9 +72,6 @@ namespace ApiLocadora.Services
                 Emprestimos = c.Emprestimos.Select(e => new
                 {
                     e.Id,
-                    e.DataInicio,
-                    e.DataPrevista,
-                    e.DataDevolucao,
                     e.Status
                 }).ToList()
             })
@@ -115,7 +109,6 @@ namespace ApiLocadora.Services
 
             if (cliente == null) return null;
 
-            // Atualiza as propriedades básicas
             cliente.Nome = clienteDto.Nome;
             cliente.Cpf = clienteDto.Cpf;
             cliente.Telefone = clienteDto.Telefone;
@@ -159,7 +152,7 @@ namespace ApiLocadora.Services
             }
 
             // Verifica se há empréstimos ativos
-            if (cliente.Emprestimos.Any(e => e.Status))
+            if (cliente.Emprestimos.Any(e => e.Status == "Em Andamento" || e.Status == "Atrasado"))
             {
                 throw new Exception("Não é possível excluir um cliente com empréstimos ativos");
             }
@@ -190,7 +183,8 @@ namespace ApiLocadora.Services
                 cliente.Bairro,
                 cliente.Numero,
                 cliente.Estado,
-                cliente.Cidade
+                cliente.Cidade,
+                Emprestimos = cliente.Emprestimos.Select(e => new { e.Id, e.Status }).ToList()
             };
         }
         catch (Exception)
@@ -200,10 +194,6 @@ namespace ApiLocadora.Services
         }
     }
 
-    public async Task<bool> Exists(int id)
-    {
-        return await _context.Clientes.AnyAsync(c => c.Id == id);
-    }
 }
     
 }

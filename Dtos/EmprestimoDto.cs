@@ -9,7 +9,7 @@ namespace ApiLocadora.Dtos
         public DateTime DataInicio { get; set; }
         public DateTime DataPrevista { get; set; }
         public DateTime DataDevolucao { get; set; }
-        public bool Status { get; set; }
+        public string Status { get; set; } = "Em Andamento";
         
         public int? ClienteId { get; set; }
         
