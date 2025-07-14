@@ -26,9 +26,9 @@ namespace ApiLocadora.Models
         public required string Cidade { get; set; }
         
         public DateOnly? DataNascimento { get; set; }
-
+        [JsonIgnore]
         public List<Emprestimo>? Emprestimos { get; set; } = [];
-        
+        [JsonIgnore]
         public List<Livro>? Livros { get; set; } = [];
     }
 }

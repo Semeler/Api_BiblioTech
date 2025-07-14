@@ -1,4 +1,4 @@
-using ApiLocadora.Common.Exceptions;
+
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
@@ -11,122 +11,199 @@ using System.Windows.Markup;
 namespace ApiLocadora.Services
 {
     public class ClienteService
+{
+    private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
+
+    public ClienteService(AppDbContext context, IMapper mapper)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+        _mapper = mapper;
+    }
 
-        private readonly IMapper _mapper;
-
-        public ClienteService(AppDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
-        public async Task<ICollection<Cliente>> GetAll()
-        {
-            var list = await _context.Clientes.ToListAsync();
-
-            return list;
-        }
-
-        public async Task<Cliente?> GetOneById(int id)
-        {
-            try
+    public async Task<ICollection<object>> GetAll()
+    {
+        var list = await _context.Clientes
+            .Include(c => c.Emprestimos)
+            .Select(c => new
             {
-                return await _context.Clientes
-                    .SingleOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        public async Task<Cliente?> Create(ClienteDto cliente)
-        {
-            try
-            {
-                var newCliente = _mapper.Map<Cliente>(cliente);
-
-                await _context.Clientes.AddAsync(newCliente);
-                await _context.SaveChangesAsync();
-
-                return newCliente;
-            }   
-            catch (Exception ex)
-            { 
-                throw ex;
-            }
-        }
-        
-        public async Task<Cliente?> Update(int id, ClienteDto cliente)
-        {
-            try
-            {
-                var _cliente = await GetOneById(id);
-
-                if (_cliente is null)
+                c.Id,
+                c.Nome,
+                c.Cpf,
+                c.Telefone,
+                c.Email,
+                c.DataNascimento,
+                c.Cep,
+                c.Rua,
+                c.Bairro,
+                c.Numero,
+                c.Estado,
+                c.Cidade,
+                Emprestimos = c.Emprestimos.Select(e => new
                 {
-                    return _cliente;
-                }
+                    e.Id,
+                    e.DataInicio,
+                    e.DataPrevista,
+                    e.DataDevolucao,
+                    e.Status
+                }).ToList()
+            })
+            .ToListAsync();
 
-                _cliente.Nome = cliente.Nome;
-                _cliente.Cpf = cliente.Cpf;
-                _cliente.Telefone = cliente.Telefone;
-                _cliente.Email = cliente.Email;
-                _cliente.Cep = cliente.Cep;
-                _cliente.Rua = cliente.Rua;
-                _cliente.Bairro = cliente.Bairro;
-                _cliente.Numero = cliente.Numero;
-                _cliente.Estado = cliente.Estado;
-                _cliente.Cidade = cliente.Cidade;
+        return list.Cast<object>().ToList();
+    }
 
-                _context.Clientes.Update(_cliente);
-                await _context.SaveChangesAsync();
-
-                return _cliente;
-            }
-            catch (Exception ex)
+    public async Task<object?> GetOneById(int id)
+    {
+        return await _context.Clientes
+            .Include(c => c.Emprestimos)
+            .Where(c => c.Id == id)
+            .Select(c => new
             {
-                    throw ex;
-            }
-            
-        }
-
-        //public async Task<Cliente?> Delete(int id)
-        //{
-        //    return null;
-        //}
-
-        
-        public async Task<Cliente?> Delete(int id)
-        {
-            try
-            {
-                var cliente = await _context.Clientes
-                    .SingleOrDefaultAsync(x => x.Id == id);
-
-                if (cliente is null)
+                c.Id,
+                c.Nome,
+                c.Cpf,
+                c.Telefone,
+                c.Email,
+                c.DataNascimento,
+                c.Cep,
+                c.Rua,
+                c.Bairro,
+                c.Numero,
+                c.Estado,
+                c.Cidade,
+                Emprestimos = c.Emprestimos.Select(e => new
                 {
-                    return null;
-                }
-                
+                    e.Id,
+                    e.DataInicio,
+                    e.DataPrevista,
+                    e.DataDevolucao,
+                    e.Status
+                }).ToList()
+            })
+            .SingleOrDefaultAsync();
+    }
 
-                _context.Clientes.Remove(cliente);
-                await _context.SaveChangesAsync();
-
-                return cliente;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            
-        }
-        
-        public bool Exist(int id)
+    public async Task<object?> Create(ClienteDto clienteDto)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            return _context.Clientes.Any(c => c.Id == id);
+            var cliente = _mapper.Map<Cliente>(clienteDto);
+
+            await _context.Clientes.AddAsync(cliente);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return await GetOneById(cliente.Id);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
+
+    public async Task<object?> Update(int id, ClienteDto clienteDto)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var cliente = await _context.Clientes
+                .Include(c => c.Emprestimos)
+                .SingleOrDefaultAsync(c => c.Id == id);
+
+            if (cliente == null) return null;
+
+            // Atualiza as propriedades básicas
+            cliente.Nome = clienteDto.Nome;
+            cliente.Cpf = clienteDto.Cpf;
+            cliente.Telefone = clienteDto.Telefone;
+            cliente.Email = clienteDto.Email;
+            cliente.DataNascimento = new DateOnly(
+                clienteDto.DataNascimento.Year,
+                clienteDto.DataNascimento.Month,
+                clienteDto.DataNascimento.Day);
+            cliente.Cep = clienteDto.Cep;
+            cliente.Rua = clienteDto.Rua;
+            cliente.Bairro = clienteDto.Bairro;
+            cliente.Numero = clienteDto.Numero;
+            cliente.Estado = clienteDto.Estado;
+            cliente.Cidade = clienteDto.Cidade;
+
+            _context.Clientes.Update(cliente);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return await GetOneById(cliente.Id);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<object?> Delete(int id)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            var cliente = await _context.Clientes
+                .Include(c => c.Emprestimos)
+                .SingleOrDefaultAsync(c => c.Id == id);
+
+            if (cliente == null)
+            {
+                return null;
+            }
+
+            // Verifica se há empréstimos ativos
+            if (cliente.Emprestimos.Any(e => e.Status))
+            {
+                throw new Exception("Não é possível excluir um cliente com empréstimos ativos");
+            }
+
+            // Remove os empréstimos relacionados
+            foreach (var emprestimo in cliente.Emprestimos.ToList())
+            {
+                emprestimo.ClienteId = null;
+                _context.Emprestimos.Update(emprestimo);
+            }
+
+            await _context.SaveChangesAsync();
+
+            _context.Clientes.Remove(cliente);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return new
+            {
+                cliente.Id,
+                cliente.Nome,
+                cliente.Cpf,
+                cliente.Telefone,
+                cliente.Email,
+                cliente.DataNascimento,
+                cliente.Cep,
+                cliente.Rua,
+                cliente.Bairro,
+                cliente.Numero,
+                cliente.Estado,
+                cliente.Cidade
+            };
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<bool> Exists(int id)
+    {
+        return await _context.Clientes.AnyAsync(c => c.Id == id);
+    }
+}
+    
 }

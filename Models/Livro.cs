@@ -20,14 +20,14 @@ namespace ApiLocadora.Models
         [JsonIgnore]
         public Genero? Genero { get; set; }
         
-        
+        [JsonIgnore]
         public List<Fornecedor> Fornecedores { get; set; } = [];
         
-        
+        [JsonIgnore]
         public List<Emprestimo> Emprestimos { get; set; } = [];
-        
+        [JsonIgnore]
         public List<Cliente> Clientes { get; set; } = []; 
-        
+        [JsonIgnore]
         public List<Estoque> Estoques { get; set; } = [];
         
         

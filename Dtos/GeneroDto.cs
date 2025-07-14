@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using ApiLocadora.Common.Validations;
+
 
 namespace ApiLocadora.Dtos
 {

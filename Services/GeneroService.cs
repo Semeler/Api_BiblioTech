@@ -1,4 +1,4 @@
-using ApiLocadora.Common.Exceptions;
+
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;

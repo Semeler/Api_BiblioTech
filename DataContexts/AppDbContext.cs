@@ -16,6 +16,8 @@ namespace ApiLocadora.DataContexts
         public DbSet<Funcionario> Funcionarios { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
         
+        
+        
         public DbSet<Estoque> Estoques { get; set; }
         public DbSet<Livro> Livros { get; set; }
         public DbSet<Genero> Generos { get; set; }
@@ -58,31 +60,15 @@ namespace ApiLocadora.DataContexts
                     l => l.HasOne(typeof(Emprestimo)).WithMany().HasForeignKey("EmprestimoId"),
                     r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId")
                 );
-
-            // Relacionamento many-to-many entre Livro e Fornecedor
+            
             modelBuilder.Entity<Livro>()
-                .HasMany(l => l.Fornecedores)
-                .WithMany(f => f.Livros)
+                .HasMany(e => e.Fornecedores)
+                .WithMany(e => e.Livros)
                 .UsingEntity(
                     "FornecedorLivro",
-                    l => l.HasOne(typeof(Fornecedor)).WithMany().HasForeignKey("FornecedorId"),
-                    r => r.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId"),
-                    j => j.ToTable("FornecedorLivro")
-                );
-            
-        
-
-                    
-            
-            
-            //modelBuilder.Entity<Livro>()
-            //    .HasMany(e => e.Fornecedores)
-            //    .WithMany(e => e.Livros)
-            //    .UsingEntity(
-            //        "FornecedorLivro",
-            //        r => r.HasOne(typeof(Fornecedor)).WithMany().HasForeignKey("GeneroId").HasPrincipalKey(nameof(Fornecedor.Id)),
-            //        l => l.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId").HasPrincipalKey(nameof(Livro.Id)),
-            //        j => j.HasKey("LivroId", "GeneroId"));
+                    r => r.HasOne(typeof(Fornecedor)).WithMany().HasForeignKey("FornecedorId").HasPrincipalKey(nameof(Fornecedor.Id)),
+                    l => l.HasOne(typeof(Livro)).WithMany().HasForeignKey("LivroId").HasPrincipalKey(nameof(Livro.Id)),
+                    j => j.HasKey("LivroId", "FornecedorId"));
             
             
             

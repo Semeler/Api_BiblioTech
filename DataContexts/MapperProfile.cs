@@ -32,7 +32,13 @@ namespace ApiLocadora.DataContexts
                     opt => opt.MapFrom(
                         src => new DateOnly(src.DataDevolucao.Year, src.DataDevolucao.Month, src.DataDevolucao.Day)
                     )
-                );
+                ).ForMember(
+                dest => dest.Livros,
+                opt => opt.Ignore() 
+            );
+            
+            
+            
             CreateMap<FuncionarioDto, Funcionario>()
                 .ForMember(
                     dest => dest.DataAdmissao, 
@@ -47,16 +53,20 @@ namespace ApiLocadora.DataContexts
                         new DateOnly(src.AnoPublicacao.Year, src.AnoPublicacao.Month, src.AnoPublicacao.Day)
                     )
                 )
-                .ForMember(dest => dest.GeneroId, opt => opt.MapFrom(src => src.GeneroId)
-                );
+                .ForMember(dest => dest.GeneroId, opt => opt.MapFrom(src => src.GeneroId))
+                .ForMember(dest => dest.Emprestimos, opt => opt.Ignore())
+                .ForMember(dest => dest.Fornecedores, opt => opt.Ignore());
+
                 
 
             CreateMap<GeneroDto, Genero>();
 
-            CreateMap<FornecedorDto, Fornecedor>();
-                
+            CreateMap<FornecedorDto, Fornecedor>()
+                .ForMember(dest => dest.Livros, opt => opt.Ignore());
             
-            CreateMap<EstoqueDto, Estoque>();
+            
+            CreateMap<EstoqueDto, Estoque>()
+                .ForMember(dest => dest.LivroId, opt => opt.MapFrom(src => src.LivroId));
         }
     }
 }

@@ -1,19 +1,14 @@
-using ApiLocadora.Common.Exceptions;
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
 using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
-using System.Windows.Markup;
 
 namespace ApiLocadora.Services
 {
     public class EstoqueService
     {
         private readonly AppDbContext _context;
-
         private readonly IMapper _mapper;
 
         public EstoqueService(AppDbContext context, IMapper mapper)
@@ -22,108 +17,146 @@ namespace ApiLocadora.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Estoque>> GetAll()
+        public async Task<ICollection<object>> GetAll()
         {
-            var list = await _context.Estoques.Include(e => e.Livro).ToListAsync();
+            var list = await _context.Estoques
+                .Include(e => e.Livro)
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Quantidade,
+                    e.CodigoDeBarras,
+                    Livro = e.Livro == null ? null : new
+                    {
+                        e.Livro.Id,
+                        e.Livro.Titulo
+                    }
+                })
+                .ToListAsync();
 
-            return list;
+            return list.Cast<object>().ToList();
         }
 
-        public async Task<Estoque?> GetOneById(int id)
+        public async Task<object?> GetOneById(int id)
         {
-            try
-            {
-                return await _context.Estoques.Include(e => e.Livro)
-                    .SingleOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            return await _context.Estoques
+                .Include(e => e.Livro)
+                .Where(e => e.Id == id)
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Quantidade,
+                    e.CodigoDeBarras,
+                    Livro = e.Livro == null ? null : new
+                    {
+                        e.Livro.Id,
+                        e.Livro.Titulo
+                    }
+                })
+                .SingleOrDefaultAsync();
         }
 
-        public async Task<Estoque?> Create(EstoqueDto estoque)
+        public async Task<object?> Create(EstoqueDto estoqueDto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if (estoque.LivroId > 0) // Verifica se foi informado um ID de gênero
+                // Verifica se o livro existe
+                if (estoqueDto.LivroId.HasValue)
                 {
                     var livro = await _context.Livros
-                        .FirstOrDefaultAsync(g => g.Id == estoque.LivroId);
-                
+                        .FirstOrDefaultAsync(l => l.Id == estoqueDto.LivroId);
+
                     if (livro == null)
                     {
-                        throw new Exception($"Gênero com ID {estoque.LivroId} não encontrado");
+                        throw new Exception($"Livro com ID {estoqueDto.LivroId} não encontrado");
                     }
                 }
-                
-                var newEstoque = _mapper.Map<Estoque>(estoque);
 
-                await _context.Estoques.AddAsync(newEstoque);
+                var estoque = _mapper.Map<Estoque>(estoqueDto);
+
+                await _context.Estoques.AddAsync(estoque);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return newEstoque;
-            }   
-            catch (Exception ex)
-            { 
-                throw ex;
+                return await GetOneById(estoque.Id);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
-        
-        public async Task<Estoque?> Update(int id, EstoqueDto estoque)
+
+        public async Task<object?> Update(int id, EstoqueDto estoqueDto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var _estoque = await GetOneById(id);
+                var estoque = await _context.Estoques.FindAsync(id);
+                if (estoque == null) return null;
 
-                if (_estoque is null)
+                // Verifica se o livro existe
+                if (estoqueDto.LivroId.HasValue)
                 {
-                    return _estoque;
+                    var livro = await _context.Livros
+                        .FirstOrDefaultAsync(l => l.Id == estoqueDto.LivroId);
+
+                    if (livro == null)
+                    {
+                        throw new Exception($"Livro com ID {estoqueDto.LivroId} não encontrado");
+                    }
                 }
 
-                _estoque.Quantidade = estoque.Quantidade;
-                _estoque.CodigoDeBarras = estoque.CodigoDeBarras;
-                
-                _context.Estoques.Update(_estoque);
-                await _context.SaveChangesAsync();
+                estoque.Quantidade = estoqueDto.Quantidade;
+                estoque.CodigoDeBarras = estoqueDto.CodigoDeBarras;
+                estoque.LivroId = estoqueDto.LivroId;
 
-                return _estoque;
+                _context.Estoques.Update(estoque);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return await GetOneById(estoque.Id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                    throw ex;
+                await transaction.RollbackAsync();
+                throw;
             }
-            
         }
 
-        public async Task<Estoque?> Delete(int id)
+        public async Task<object?> Delete(int id)
         {
             try
             {
                 var estoque = await _context.Estoques
-                    .SingleOrDefaultAsync(x => x.Id == id);
+                    .Include(e => e.Livro)
+                    .SingleOrDefaultAsync(e => e.Id == id);
 
-                if (estoque is null)
+                if (estoque == null)
                 {
                     return null;
                 }
-                
 
                 _context.Estoques.Remove(estoque);
                 await _context.SaveChangesAsync();
 
-                return estoque;
+                return new
+                {
+                    estoque.Id,
+                    estoque.Quantidade,
+                    estoque.CodigoDeBarras,
+                    Livro = estoque.Livro == null ? null : new
+                    {
+                        estoque.Livro.Id,
+                        estoque.Livro.Titulo
+                    }
+                };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
-            
-        }
-
-        private async Task<bool> Exist(int id)
-        {
-            return await _context.Estoques.AnyAsync(c => c.Id == id);
         }
     }
 }

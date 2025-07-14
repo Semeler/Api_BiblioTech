@@ -1,4 +1,4 @@
-using ApiLocadora.Common.Exceptions;
+
 using ApiLocadora.DataContexts;
 using ApiLocadora.Dtos;
 using ApiLocadora.Models;
@@ -13,7 +13,6 @@ namespace ApiLocadora.Services
     public class LivroService
     {
         private readonly AppDbContext _context;
-
         private readonly IMapper _mapper;
 
         public LivroService(AppDbContext context, IMapper mapper)
@@ -21,134 +20,247 @@ namespace ApiLocadora.Services
             _context = context;
             _mapper = mapper;
         }
-
-        public async Task<ICollection<Livro>> GetAll()
+        
+        public async Task<ICollection<object>> GetAll()
         {
             var list = await _context.Livros
-                .Include(e => e.Fornecedores)
-                .Include(e => e.Genero)
-                .Include(e => e.Estoques)
+                .Include(l => l.Genero)
+                .Include(l => l.Emprestimos)
+                .Include(l => l.Fornecedores)
+                .Include(l => l.Estoques)
+                .Select(l => new
+                {
+                    l.Id,
+                    l.Titulo,
+                    l.Autor,
+                    l.Isbn,
+                    l.Editora,
+                    l.Sinopse,
+                    l.AnoPublicacao,
+                    Genero = l.Genero == null ? null : new
+                    {
+                        l.Genero.Id,
+                        l.Genero.Nome
+                    },
+                    Emprestimos = l.Emprestimos.Select(e => new
+                    {
+                        e.Id,
+                        e.DataInicio,
+                        e.DataPrevista,
+                        e.DataDevolucao,
+                        e.Status
+                    }).ToList(),
+                    Fornecedores = l.Fornecedores.Select(f => new
+                    {
+                        f.Id,
+                        f.Nome,
+                        f.Cnpj
+                    }).ToList(),
+                    Estoques = l.Estoques.Select(e => new
+                    {
+                        e.Id,
+                        e.Quantidade,
+                    }).ToList()
+                })
                 .ToListAsync();
 
-            return list;
+            return list.Cast<object>().ToList();
         }
 
-        public async Task<Livro?> GetOneById(int id)
-        {
-            try
-            {
-                return await _context.Livros
-                    .SingleOrDefaultAsync(x => x.Id == id);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-
-        //public async Task<Livro?> Create(LivroDto livro)
-        //{
-        //    try
-        //    {
-        //        var newLivro = _mapper.Map<Livro>(livro);
-        //  
-        //        await _context.Livros.AddAsync(newLivro);
-        //        await _context.SaveChangesAsync();
-
-        //        return newLivro;
-        //    }   
-        //    catch (Exception ex)
-        //    { 
-        //        throw ex;
-        //    }
-        //}
-
-        public async Task<Livro?> Create(LivroDto livroDto)
-        {
-            if (livroDto.GeneroId > 0) // Verifica se foi informado um ID de gênero
-            {
-                var genero = await _context.Generos
-                    .FirstOrDefaultAsync(g => g.Id == livroDto.GeneroId);
-                
-                if (genero == null)
-                {
-                    throw new Exception($"Gênero com ID {livroDto.GeneroId} não encontrado");
-                }
-            }
-            
-            
-            var livro = _mapper.Map<Livro>(livroDto);
         
-            await _context.Livros.AddAsync(livro);
-            await _context.SaveChangesAsync();
-
-            return await GetOneById(livro.Id);
-        }
-
-
-
-        public async Task<Livro?> Update(int id, LivroDto livro)
+        public async Task<object?> Create(LivroDto livroDto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var _livro = await GetOneById(id);
-
-                if (_livro is null)
+                // Verifica se o gênero existe
+                if (livroDto.GeneroId.HasValue)
                 {
-                    return _livro;
+                    var genero = await _context.Generos
+                        .FirstOrDefaultAsync(g => g.Id == livroDto.GeneroId);
+
+                    if (genero == null)
+                    {
+                        throw new Exception($"Gênero com ID {livroDto.GeneroId} não encontrado");
+                    }
                 }
 
-                _livro.Titulo = livro.Titulo;
-                _livro.Autor = livro.Autor;
-                _livro.Isbn = livro.Isbn;
-                _livro.Editora = livro.Editora;
-                _livro.Sinopse = livro.Sinopse;
-                _livro.GeneroId = livro.GeneroId;
+                var livro = _mapper.Map<Livro>(livroDto);
                 
-                _context.Livros.Update(_livro);
+                await _context.Livros.AddAsync(livro);
                 await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return _livro;
+                return await GetOneById(livro.Id);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                    throw ex;
+                await transaction.RollbackAsync();
+                throw;
             }
-            
         }
 
-        //public async Task<Livro?> Delete(int id)
-        //{
-        //    return null;
-        //}
-
-        public async Task<Livro?> Delete(int id)
+        public async Task<object?> Update(int id, LivroDto livroDto)
         {
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 var livro = await _context.Livros
+                    .SingleOrDefaultAsync(x => x.Id == id);
+                
+                if (livro == null) return null;
+
+                // Verifica se o gênero existe
+                if (livroDto.GeneroId.HasValue)
+                {
+                    var genero = await _context.Generos
+                        .FirstOrDefaultAsync(g => g.Id == livroDto.GeneroId);
+
+                    if (genero == null)
+                    {
+                        throw new Exception($"Gênero com ID {livroDto.GeneroId} não encontrado");
+                    }
+                }
+
+                // Atualiza as propriedades básicas
+                livro.Titulo = livroDto.Titulo;
+                livro.Autor = livroDto.Autor;
+                livro.Isbn = livroDto.Isbn;
+                livro.Editora = livroDto.Editora;
+                livro.Sinopse = livroDto.Sinopse;
+                livro.AnoPublicacao = new DateOnly(livroDto.AnoPublicacao.Year, 
+                                                 livroDto.AnoPublicacao.Month,
+                                                 livroDto.AnoPublicacao.Day);
+                livro.GeneroId = livroDto.GeneroId;
+
+                _context.Livros.Update(livro);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return await GetOneById(livro.Id);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        // O método GetOneById também precisa ser atualizado para incluir as listas de relacionamentos
+        public async Task<object?> GetOneById(int id)
+        {
+            return await _context.Livros
+                .Include(l => l.Genero)
+                .Include(l => l.Emprestimos)
+                .Include(l => l.Fornecedores)
+                .Include(l => l.Estoques)
+                .Where(x => x.Id == id)
+                .Select(l => new
+                {
+                    l.Id,
+                    l.Titulo,
+                    l.Autor,
+                    l.Isbn,
+                    l.Editora,
+                    l.Sinopse,
+                    l.AnoPublicacao,
+                    Genero = l.Genero == null ? null : new
+                    {
+                        l.Genero.Id,
+                        l.Genero.Nome
+                    },
+                    Emprestimos = l.Emprestimos.Select(e => new
+                    {
+                        e.Id,
+                        e.DataInicio,
+                        e.DataPrevista,
+                        e.DataDevolucao,
+                        e.Status
+                    }).ToList(),
+                    Fornecedores = l.Fornecedores.Select(f => new
+                    {
+                        f.Id,
+                        f.Nome,
+                        f.Cnpj
+                    }).ToList()
+                })
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task<object?> Delete(int id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var livro = await _context.Livros
+                    .Include(l => l.Emprestimos)
+                    .Include(l => l.Fornecedores)
+                    .Include(l => l.Estoques)
+                    .Include(l => l.Genero)
                     .SingleOrDefaultAsync(x => x.Id == id);
 
                 if (livro is null)
                 {
                     return null;
                 }
-                
 
-                _context.Livros.Remove(livro);
+                // Verifica se há empréstimos ativos
+                if (livro.Emprestimos.Any(e => e.Status))
+                {
+                    throw new Exception("Não é possível excluir um livro com empréstimos ativos");
+                }
+
+                // Limpa os relacionamentos
+                livro.Emprestimos.Clear();
+                livro.Fornecedores.Clear();
+
+                // Remove os estoques relacionados
+                _context.Estoques.RemoveRange(livro.Estoques);
+        
                 await _context.SaveChangesAsync();
 
-                return livro;
+                // Remove o livro
+                _context.Livros.Remove(livro);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new
+                {
+                    livro.Id,
+                    livro.Titulo,
+                    livro.Autor,
+                    livro.Isbn,
+                    livro.Editora,
+                    livro.Sinopse,
+                    livro.AnoPublicacao,
+                    Genero = livro.Genero == null ? null : new
+                    {
+                        livro.Genero.Id,
+                        livro.Genero.Nome
+                    },
+                    Emprestimos = livro.Emprestimos.Select(e => new
+                    {
+                        e.Id,
+                        e.DataInicio,
+                        e.DataPrevista,
+                        e.DataDevolucao,
+                        e.Status
+                    }).ToList(),
+                    Fornecedores = livro.Fornecedores.Select(f => new
+                    {
+                        f.Id,
+                        f.Nome,
+                        f.Cnpj
+                    }).ToList()
+                };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                await transaction.RollbackAsync();
+                throw;
             }
-            
         }
-        private async Task<bool> Exist(int id)
-        {
-            return await _context.Livros.AnyAsync(c => c.Id == id);
-        }
+
     }
+
 }

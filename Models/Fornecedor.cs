@@ -24,11 +24,10 @@ namespace ApiLocadora.Models
         
         public required string Cidade { get; set; }
 
-        public DateOnly? AnoLancamento { get; set; }
         
-       
         public List<Livro>? Livros { get; set; } = [];
-
+        
+        
      
     }
 }

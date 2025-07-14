@@ -31,7 +31,7 @@ namespace ApiLocadora.Models
         public required string Cidade { get; set; }
 
         public DateOnly? DataAdmissao { get; set; }
-        
+        [JsonIgnore]
         public List<Emprestimo>? Emprestimos { get; set; } = [];
         
         

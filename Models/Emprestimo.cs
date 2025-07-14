@@ -26,6 +26,6 @@ namespace ApiLocadora.Models
         
         public virtual Funcionario? Funcionario { get; set; }
         
-        public List<Livro> Livros { get; set; } = [];
+        public List<Livro> Livros { get; set; } = new();
     }
 }

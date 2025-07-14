@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using ApiLocadora.Common.Validations;
+
 
 namespace ApiLocadora.Dtos
 {
@@ -13,7 +13,7 @@ namespace ApiLocadora.Dtos
         
         [Required]
         
-        public int LivroId { get; set; }
+        public int? LivroId { get; set; }
      
     }
 }

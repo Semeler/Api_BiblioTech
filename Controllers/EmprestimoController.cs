@@ -91,11 +91,11 @@ namespace ApiLocadora.Controllers
         {
             try
             {
-                var emprestimo = await _service.Delete(id);
+                var livro = await _service.Delete(id);
 
-                if (emprestimo is null)
+                if (livro is null)
                 {
-                    return NotFound("Emprestimo não encontrado!");
+                    return NotFound("Livro não encontrado!");
                 }
 
                 return NoContent();
@@ -105,5 +105,8 @@ namespace ApiLocadora.Controllers
                 return Problem(ex.Message);
             }
         }
+
+        
+
     }
 }
