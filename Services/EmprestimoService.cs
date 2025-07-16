@@ -155,7 +155,7 @@ namespace ApiLocadora.Services
                 var emprestimo = await _context.Emprestimos
                     .Include(e => e.Livros)
                     .SingleOrDefaultAsync(e => e.Id == id);
-
+                    
                 if (emprestimo == null) return null;
 
                 emprestimo.DataInicio = emprestimoDto.DataInicio.HasValue
@@ -237,7 +237,7 @@ namespace ApiLocadora.Services
                 emprestimo.ClienteId = null;
                 emprestimo.Funcionario = null;
                 emprestimo.FuncionarioId = null;
-
+                
                 await _context.SaveChangesAsync();
 
                 _context.Emprestimos.Remove(emprestimo);
