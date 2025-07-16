@@ -34,12 +34,12 @@ namespace ApiLocadora.Services
                     e.DataPrevista,
                     e.DataDevolucao,
                     e.Status,
-                    Cliente = new
+                    Cliente = e.Cliente == null ? null : new
                     {
                         e.Cliente.Id,
                         e.Cliente.Nome,
                     },
-                    Funcionario = new
+                    Funcionario = e.Funcionario == null ? null : new
                     {
                         e.Funcionario.Id,
                         e.Funcionario.Nome,
@@ -70,12 +70,12 @@ namespace ApiLocadora.Services
                 e.DataPrevista,
                 e.DataDevolucao,
                 e.Status,
-                Cliente = new
+                Cliente = e.Cliente == null ? null : new
                 {
                     e.Cliente.Id,
                     e.Cliente.Nome,
                 },
-                Funcionario = new
+                Funcionario = e.Funcionario == null ? null : new
                 {
                     e.Funcionario.Id,
                     e.Funcionario.Nome,

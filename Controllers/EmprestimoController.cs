@@ -97,7 +97,7 @@ namespace ApiLocadora.Controllers
                 {
                     return NotFound("Livro não encontrado!");
                 }
-
+                    
                 return NoContent();
             }
             catch (Exception ex)
