@@ -122,23 +122,31 @@ INSERT INTO Genero (Nome, Descricao) VALUES
 ('Ficção Científica', 'Livros que exploram conceitos científicos e tecnológicos'),
 ('Fantasia', 'Livros com elementos mágicos e mundos imaginários'),
 ('Terror', 'Livros com histórias de suspense e horror'),
-('Drama', 'Livros com histórias emocionais e conflitos humanos');
+('Drama', 'Livros com histórias emocionais e conflitos humanos'),
+('Aventura', 'Livros com histórias de exploração e desafios'),
+('Biografia', 'Relatos da vida de pessoas reais'),
+('História', 'Livros sobre eventos históricos'),
+('Humor', 'Livros com histórias engraçadas e divertidas'),
+('Mistério', 'Livros com investigação e enigmas'),
+('Poesia', 'Coletâneas de poemas e versos'),
+('Autoajuda', 'Livros para desenvolvimento pessoal'),
+('Infantil', 'Livros para crianças com histórias educativas');
 
 INSERT INTO Livro (Titulo, Autor, Isbn, Editora, Sinopse, AnoPublicacao, GeneroId) VALUES
 ('O Senhor dos Anéis', 'J.R.R. Tolkien', '978-85-333-0227-3', 'Martins Fontes', 'Uma jornada épica em um mundo de fantasia', '1954-07-29', 3),
 ('1984', 'George Orwell', '978-85-359-0277-1', 'Companhia das Letras', 'Um futuro distópico onde a sociedade é controlada', '1949-06-08', 2),
-('O Iluminado', 'Stephen King', '978-85-359-0277-2', 'Suma', 'Uma família isolada em um hotel assombrado', '1977-01-28', 4);
-
-INSERT INTO Livro (Titulo, Autor, Isbn, Editora, Sinopse, AnoPublicacao, GeneroId) VALUES
-('O Senhor dos Anéis', 'J.R.R. Tolkien', '978-85-333-0227-3', 'Martins Fontes', 'Uma jornada épica em um mundo de fantasia', '1954-07-29', 3),
-('1984', 'George Orwell', '978-85-359-0277-1', 'Companhia das Letras', 'Um futuro distópico onde a sociedade é controlada', '1949-06-08', 2),
-('O Iluminado', 'Stephen King', '978-85-359-0277-2', 'Suma', 'Uma família isolada em um hotel assombrado', '1977-01-28', 4);
-
-
-INSERT INTO Emprestimo (DataInicio, DataPrevista, DataDevolucao, Status, ClienteId, FuncionarioId) VALUES
-('2024-01-01', '2024-01-15', NULL, 'Em andamento', 1, 1),
-('2024-01-05', '2024-01-20', NULL, 'Em andamento', 2, 2),
-('2024-01-10', '2024-01-25', '2024-01-23', 'Finalizado', 3, 3);
-
+('O Iluminado', 'Stephen King', '978-85-359-0277-2', 'Suma', 'Uma família isolada em um hotel assombrado', '1977-01-28', 4),
+('Orgulho e Preconceito', 'Jane Austen', '978-85-359-0001-5', 'Penguin', 'Romance clássico sobre costumes e relacionamentos', '1813-01-28', 1),
+('Como Eu Era Antes de Você', 'Jojo Moyes', '978-85-503-0001-2', 'Intrínseca', 'Uma história de amor e superação', '2012-01-05', 1),
+('Duna', 'Frank Herbert', '978-85-359-0002-3', 'Aleph', 'Uma disputa política em um planeta desértico', '1965-08-01', 2),
+('Neuromancer', 'William Gibson', '978-85-503-0002-9', 'Aleph', 'Um marco do cyberpunk com hackers e IA', '1984-07-01', 2),
+('Harry Potter e a Pedra Filosofal', 'J.K. Rowling', '978-85-333-0003-7', 'Rocco', 'Um garoto descobre que é um bruxo', '1997-06-26', 3),
+('A Guerra dos Tronos', 'George R.R. Martin', '978-85-333-0004-4', 'Leya', 'Intrigas políticas em um mundo medieval', '1996-08-06', 3),
+('It - A Coisa', 'Stephen King', '978-85-503-0003-6', 'Suma', 'Um grupo enfrenta uma entidade maligna', '1986-09-15', 4),
+('A Menina que Roubava Livros', 'Markus Zusak', '978-85-359-0005-0', 'Intrínseca', 'A história de uma garota durante a Segunda Guerra', '2005-03-14', 5),
+('As Aventuras de Tom Sawyer', 'Mark Twain', '978-85-503-0004-3', 'Penguin', 'Um garoto vive travessuras às margens do Mississippi', '1876-06-17', 6),
+('Steve Jobs', 'Walter Isaacson', '978-85-503-0005-0', 'Companhia das Letras', 'A vida do fundador da Apple', '2011-10-24', 7),
+('Sapiens - Uma Breve História da Humanidade', 'Yuval Noah Harari', '978-85-503-0006-7', 'L&PM', 'A evolução da humanidade ao longo dos séculos', '2011-01-01', 8),
+('O Assassinato no Expresso do Oriente', 'Agatha Christie', '978-85-503-0007-4', 'Globo', 'Um crime misterioso em um trem de luxo', '1934-01-01', 10);
 
 
