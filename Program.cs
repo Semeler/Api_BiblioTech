@@ -14,16 +14,25 @@ builder.Services.AddControllers().AddJsonOptions(x =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "API BiblioTech",  // TÃ­tulo que vocÃª deseja
+        Version = "v1",
+        Description = "API para sistema de biblioteca"
+    });
+});
 
-// Configuração do banco
+
+// Configuraï¿½ï¿½o do banco
 var connectionString = builder.Configuration.GetConnectionString("default");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 
-// Configuração do CORS correta
+// Configuraï¿½ï¿½o do CORS correta
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -35,7 +44,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Injeção de dependência
+// Injeï¿½ï¿½o de dependï¿½ncia
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<EmprestimoService>();
 builder.Services.AddScoped<EstoqueService>();
@@ -53,7 +62,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Aqui aplica a política CORS correta
+// Aqui aplica a polï¿½tica CORS correta
 app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
